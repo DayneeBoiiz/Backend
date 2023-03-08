@@ -21,3 +21,13 @@ export class AuthDto {
   @IsNotEmpty()
   FirstName: string;
 }
+
+export class AuthDtoLogin {
+  @IsEmail()
+  @IsNotEmpty()
+  email: string;
+
+  @IsString()
+  @IsNotEmpty()
+  password: string;
+}
