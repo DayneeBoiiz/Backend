@@ -1,10 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Profile, Strategy as FortyTwoStrategy } from 'passport-42';
+import { AuthService } from '../auth.service';
 
 @Injectable()
 export class Strategy_42 extends PassportStrategy(FortyTwoStrategy) {
-  constructor() {
+  constructor(
+    @Inject('FortyTwoStrategy') private readonly authService: AuthService,
+  ) {
     super({
       clientID:
         'u-s4t2ud-d2112c97d0018f46d03062961f3d5025d67573714305341012ae2441aa8237e0',
@@ -14,9 +17,19 @@ export class Strategy_42 extends PassportStrategy(FortyTwoStrategy) {
     });
   }
 
-  async validate(accessToken: string, refreshToken: string, Profile: Profile) {
-    console.log(accessToken);
-    console.log(refreshToken);
-    // console.log(Profile);
+  async validate(accessToken: string, refreshToken: string, profile: Profile) {
+    // console.log(accessToken);
+    // console.log(refreshToken);
+    // console.log(profile);
+
+    // const result: UserDetails = JSON.parse(profile._json);
+    // console.log(result);
+
+    this.authService.ValidateUser({
+      email: profile._json.email,
+      login: profile._json.login,
+      firstname: profile._json.first_name,
+      lastname: profile._json.last_name,
+    });
   }
 }

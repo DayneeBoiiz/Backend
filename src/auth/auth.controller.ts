@@ -7,15 +7,15 @@ import { FortyTwoAuthGuard } from './utils/Guards';
 export class AuthController {
   constructor(private authService: AuthService) {}
 
-  // @Post('signup')
-  // signup(@Body() dto: AuthDto) {
-  //   return this.authService.signup(dto);
-  // }
+  @Post('signup')
+  signup(@Body() dto: AuthDto) {
+    return this.authService.signup(dto);
+  }
 
-  // @Post('signin')
-  // signin(@Body() dtologin: AuthDtoLogin) {
-  //   return this.authService.signin(dtologin);
-  // }
+  @Post('signin')
+  signin(@Body() dtologin: AuthDtoLogin) {
+    return this.authService.signin(dtologin);
+  }
 
   @Get('/42/login')
   @UseGuards(FortyTwoAuthGuard)

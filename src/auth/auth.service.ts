@@ -6,10 +6,26 @@ import {
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AuthDto, AuthDtoLogin } from './dto';
 import * as argon from 'argon2';
+import { UserDetails } from './utils/types';
 
 @Injectable()
 export class AuthService {
   constructor(private prisma: PrismaService) {}
+
+  async ValidateUser(details: UserDetails) {
+    const user = await this.prisma.user.create({
+      data: {
+        email: details.email,
+        NickName: details.login,
+        firstName: details.firstname,
+        LastName: details.lastname,
+        hash: '',
+      },
+    });
+    delete user.hash;
+    return user;
+  }
+
   async signin(dto: AuthDtoLogin) {
     const user = await this.prisma.user.findUnique({
       where: {
