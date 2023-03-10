@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthDto, AuthDtoLogin } from './dto';
+import { AuthenticatedGuard } from './utils/authenticated.guard';
 import { FortyTwoAuthGuard } from './utils/Guards';
 
 @Controller('auth')
@@ -19,12 +20,14 @@ export class AuthController {
 
   @Get('/42/login')
   @UseGuards(FortyTwoAuthGuard)
+  @UseGuards(AuthenticatedGuard)
   handlLogin() {
     return { msg: 'Hello World' };
   }
 
   @Get('/42/callback')
   @UseGuards(FortyTwoAuthGuard)
+  @UseGuards(AuthenticatedGuard)
   handRedirect() {
     return { msg: 'OK' };
   }

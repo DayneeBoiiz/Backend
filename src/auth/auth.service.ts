@@ -12,17 +12,33 @@ import { UserDetails } from './utils/types';
 export class AuthService {
   constructor(private prisma: PrismaService) {}
 
+  async findUser(id: number) {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+    });
+    return user;
+  }
+
   async ValidateUser(details: UserDetails) {
-    const user = await this.prisma.user.create({
-      data: {
+    const user = await this.prisma.user.findUnique({
+      where: {
         email: details.email,
-        NickName: details.login,
-        firstName: details.firstname,
-        LastName: details.lastname,
-        hash: '',
       },
     });
-    delete user.hash;
+
+    if (!user) {
+      const Newuser = await this.prisma.user.create({
+        data: {
+          email: details.email,
+          NickName: details.login,
+          firstName: details.firstname,
+          LastName: details.lastname,
+          hash: '',
+        },
+      });
+      delete Newuser.hash;
+      return Newuser;
+    }
     return user;
   }
 
