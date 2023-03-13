@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Profile, Strategy as FortyTwoStrategy } from 'passport-42';
 import { AuthService } from '../auth.service';
@@ -31,5 +31,9 @@ export class Strategy_42 extends PassportStrategy(FortyTwoStrategy) {
       firstname: profile._json.first_name,
       lastname: profile._json.last_name,
     });
+
+    console.log(user);
+    if (!user) throw new UnauthorizedException();
+    return user;
   }
 }

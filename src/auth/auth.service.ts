@@ -1,16 +1,22 @@
 import {
   ConflictException,
-  ForbiddenException,
   Injectable,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AuthDto, AuthDtoLogin } from './dto';
 import * as argon from 'argon2';
 import { UserDetails } from './utils/types';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private jwt: JwtService,
+    private config: ConfigService,
+  ) {}
 
   async findUser(id: number) {
     const user = await this.prisma.user.findUnique({
@@ -36,10 +42,12 @@ export class AuthService {
           hash: '',
         },
       });
-      delete Newuser.hash;
-      return Newuser;
+      const ret = await this.signToken(Newuser.id, Newuser.email);
+      return ret;
     }
-    return user;
+
+    const ret = await this.signToken(user.id, user.email);
+    return ret;
   }
 
   async signin(dto: AuthDtoLogin) {
@@ -50,15 +58,14 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new ForbiddenException('User not found');
+      throw new UnauthorizedException('Invalid email or password');
     }
 
     const pwMatches = await argon.verify(user.hash, dto.password);
     if (!pwMatches) {
-      throw new ForbiddenException('Incorrect password');
+      throw new UnauthorizedException('Incorrect password');
     }
 
-    delete user.hash;
     return user;
   }
 
@@ -75,12 +82,32 @@ export class AuthService {
         },
       });
 
-      delete user.hash;
       return user;
     } catch (error) {
       if (error.code == 'P2002') {
         throw new ConflictException('Credentials taken');
       }
     }
+  }
+
+  async signToken(
+    userId: number,
+    email: string,
+  ): Promise<{ access_token: string }> {
+    const payload = {
+      sub: userId,
+      email,
+    };
+
+    const secret = this.config.get('JWT_SECRET');
+
+    const ret = await this.jwt.signAsync(payload, {
+      expiresIn: '1h',
+      secret: secret,
+    });
+
+    return {
+      access_token: ret,
+    };
   }
 }

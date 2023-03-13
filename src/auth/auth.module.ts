@@ -1,12 +1,17 @@
 import { Module } from '@nestjs/common';
-import { PassportModule } from '@nestjs/passport';
+import { JwtModule } from '@nestjs/jwt';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { Strategy_42 } from './utils/42.strategy';
 import { SessionSerializer } from './utils/Serializer';
 
 @Module({
-  imports: [PassportModule.register({ session: true })],
+  imports: [
+    JwtModule.register({
+      secret: 'secretKey',
+      signOptions: { expiresIn: '60s' },
+    }),
+  ],
   controllers: [AuthController],
   providers: [
     AuthService,

@@ -4,3 +4,7 @@ export type UserDetails = {
   firstname: string;
   lastname: string;
 };
+
+export interface Request {
+  user: any;
+}
